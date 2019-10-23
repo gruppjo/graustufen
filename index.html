@@ -40,15 +40,19 @@
       To create a production bundle, use `npm run build` or `yarn build`.
 		-->
 		<script>
+				function sleep(ms) {
+					return new Promise(resolve => setTimeout(resolve, ms));
+				}
+
 				const grid = {
 					x: 5,
-					y: 5
+					y: 5,
 				};
 
 				const img = new Image(500, 500);
 				img.src = './crop.jpg';
 				console.log(img);
-				img.addEventListener('load', () => {
+				img.addEventListener('load', async () => {
 
 					// taken from color thief - https://github.com/lokesh/color-thief/blob/master/src/color-thief.js#L31
 					const canvas = document.createElement('canvas');
@@ -65,7 +69,45 @@
 
 					const cellLength = imageData.data.length / (grid.x * grid.y);
 					console.log(imageData, imageData.data.length, cellLength);
+					const cellNumbers = imageData.data.length / cellLength;
 
+					const indexTestArray = [];
+					const gridColors = [];
+
+					for (let c = 0; c < cellNumbers; c++) {
+						const startIndex = c * cellLength;
+						const endIndex = (c + 1) * cellLength;
+						let r = 0;
+						let g = 0;
+						let b = 0;
+						let a = 0;
+						// -3 because we look ahead three values +=4
+						for (let i = startIndex; i < endIndex - 3; i+= 4) {
+							indexTestArray.push(i);
+							r += imageData.data[i];
+							g += imageData.data[i + 1];
+							b += imageData.data[i + 2];
+							a += imageData.data[i + 3];
+						}
+						r = Math.round(r / cellLength * 4);
+						g = Math.round(g / cellLength * 4);
+						b = Math.round(b / cellLength * 4);
+						a = Math.round(a / cellLength * 4);
+						console.log(`r,g,b,a`,r, g, b, a);
+						gridColors.push({r, g, b, a});
+						const cellRgba = `rgba(${gridColors[c].r},${gridColors[c].g},${gridColors[c].b},${gridColors[c].a})`;
+						const cellX = c % 5 * 100;
+						const cellY = Math.floor(c / 5) * 100;
+						console.log('cellRgba', cellRgba, cellX, cellY);
+						context.beginPath();
+						context.rect(cellX, cellY, 100, 100);
+						context.fillStyle = cellRgba;
+						context.fill();
+
+						await sleep(200);
+					}
+					console.log(gridColors);
+					console.log(indexTestArray);
 
 				});
 			</script>
