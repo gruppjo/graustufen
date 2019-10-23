@@ -118,17 +118,28 @@
 						}
 					}
 					// calculate average
-					gridColors[cell].r = Math.round(gridColors[cell].r / cellWidth / cellHeight);
-					gridColors[cell].g = Math.round(gridColors[cell].g / cellWidth / cellHeight);
-					gridColors[cell].b = Math.round(gridColors[cell].b / cellWidth / cellHeight);
-					gridColors[cell].a = Math.round(gridColors[cell].a / cellWidth / cellHeight);
+					const r = Math.round(gridColors[cell].r / cellWidth / cellHeight);
+					const g = Math.round(gridColors[cell].g / cellWidth / cellHeight);
+					const b = Math.round(gridColors[cell].b / cellWidth / cellHeight);
+					const a = Math.round(gridColors[cell].a / cellWidth / cellHeight);
+
+					gridColors[cell].r = r;
+					gridColors[cell].g = g;
+					gridColors[cell].b = b;
+					gridColors[cell].a = a;
+
+					let cellRgba = `rgba(${gridColors[cell].r}, ${gridColors[cell].g}, ${gridColors[cell].b}, ${gridColors[cell].a})`;
+
+					console.log(`cell ${cell} ${cellRgba}`);
+
+					if (greyscale) {
+						let grey = (r + g + b) / 3;
+						cellRgba = `rgba(${grey}, ${grey}, ${grey}, ${a})`;
+					}
 
 					const rectX = cellColumn * cellWidth;
 					const rectY = cellRow * cellHeight;
 
-					const cellRgba = `rgba(${gridColors[cell].r}, ${gridColors[cell].g}, ${gridColors[cell].b}, ${gridColors[cell].a})`;
-
-					console.log(`cell ${cell} ${cellRgba}`);
 
 					context.beginPath();
 					context.rect(rectX, rectY, 100, 100);
