@@ -40,105 +40,106 @@
       To create a production bundle, use `npm run build` or `yarn build`.
 		-->
 		<script>
-				function sleep(ms) {
-					return new Promise(resolve => setTimeout(resolve, ms));
-				}
+			const greyscale = true;
+			function sleep(ms) {
+				return new Promise(resolve => setTimeout(resolve, ms));
+			}
 
-				const grid = {
-					x: 5,
-					y: 5,
-					cellNumbers: 0
-				};
-				grid.cellNumbers = grid.x * grid.y;
-				const img = {
-					width: 500,
-					height: 500,
-					el: null
-				};
+			const grid = {
+				x: 5,
+				y: 5,
+				cellNumbers: 0
+			};
+			grid.cellNumbers = grid.x * grid.y;
+			const img = {
+				width: 500,
+				height: 500,
+				el: null
+			};
 
-				img.el = new Image(img.width, img.height);
-				img.el.src = './crop.jpg';
+			img.el = new Image(img.width, img.height);
+			img.el.src = './crop.jpg';
 
-				// console.log(img);
-				img.el.addEventListener('load', async () => {
+			// console.log(img);
+			img.el.addEventListener('load', async () => {
 
-					// taken from color thief - https://github.com/lokesh/color-thief/blob/master/src/color-thief.js#L31
-					const canvas = document.createElement('canvas');
-					document.body.appendChild(canvas);
-					const context = canvas.getContext('2d');
-					canvas.width = img.width;
-					canvas.height = img.height;
-					context.drawImage(img.el, 0, 0, img.width, img.height);
+				// taken from color thief - https://github.com/lokesh/color-thief/blob/master/src/color-thief.js#L31
+				const canvas = document.createElement('canvas');
+				document.body.appendChild(canvas);
+				const context = canvas.getContext('2d');
+				canvas.width = img.width;
+				canvas.height = img.height;
+				context.drawImage(img.el, 0, 0, img.width, img.height);
 
-					// https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D/getImageData
-					// gives you https://developer.mozilla.org/en-US/docs/Web/API/ImageData
-					// one dimensional RGBA values of the image
-					const imageData = context.getImageData(0, 0, img.width, img.height);
+				// https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D/getImageData
+				// gives you https://developer.mozilla.org/en-US/docs/Web/API/ImageData
+				// one dimensional RGBA values of the image
+				const imageData = context.getImageData(0, 0, img.width, img.height);
 
-					const gridColors = new Array(grid.cellNumbers).fill(grid.cellNumbers)
-					.map((item) => {
-						return {
-							r: 0,
-							g: 0,
-							b: 0,
-							a: 0
-						};
-					});
-					console.log('imageData', imageData);
-					console.log('gridColors', gridColors);
-
-					const cellWidth = img.height / grid.x;
-					const cellHeight = img.height / grid.y;
-					const valuesPerPixel = 4; // r g b a
-
-					for (let cell = 0; cell < 25; cell++) {
-						let cellColumn = cell % 5;
-						let cellRow = Math.floor(cell / grid.x);
-						// console.log('cell', cell, 'cellColumn', cellColumn, 'cellRow', cellRow);
-						// iterate over rows of cell
-						for (let pixelRow = 0; pixelRow < cellHeight; pixelRow++) {
-							for (let pixel = 0; pixel < cellWidth; pixel++) {
-								const pixelIndex =
-									// pixelIndex
-									pixel * valuesPerPixel
-									// + pixelRowIndex
-									+ pixelRow * img.width * valuesPerPixel
-									// + cellColumnIndex
-									+ cellColumn * cellWidth * valuesPerPixel
-									// + cellRowIndex
-									+ cellRow * cellHeight * img.width * valuesPerPixel;
-
-								// add them all up
-								gridColors[cell].r += imageData.data[pixelIndex];
-								gridColors[cell].g += imageData.data[pixelIndex + 1];
-								gridColors[cell].b += imageData.data[pixelIndex + 2];
-								gridColors[cell].a += imageData.data[pixelIndex + 3];
-								// console.log(pixelIndex);
-							}
-						}
-						// calculate average
-						gridColors[cell].r = Math.round(gridColors[cell].r / cellWidth / cellHeight);
-						gridColors[cell].g = Math.round(gridColors[cell].g / cellWidth / cellHeight);
-						gridColors[cell].b = Math.round(gridColors[cell].b / cellWidth / cellHeight);
-						gridColors[cell].a = Math.round(gridColors[cell].a / cellWidth / cellHeight);
-
-						const rectX = cellColumn * cellWidth;
-						const rectY = cellRow * cellHeight;
-
-						const cellRgba = `rgba(${gridColors[cell].r}, ${gridColors[cell].g}, ${gridColors[cell].b}, ${gridColors[cell].a})`;
-
-						console.log(`cell ${cell} ${cellRgba}`);
-
-						context.beginPath();
-						context.rect(rectX, rectY, 100, 100);
-						context.fillStyle = cellRgba;
-						context.fill();
-
-						await sleep(50);
-					}
-					console.log(gridColors);
-
+				const gridColors = new Array(grid.cellNumbers).fill(grid.cellNumbers)
+				.map((item) => {
+					return {
+						r: 0,
+						g: 0,
+						b: 0,
+						a: 0
+					};
 				});
-			</script>
+				console.log('imageData', imageData);
+				console.log('gridColors', gridColors);
+
+				const cellWidth = img.height / grid.x;
+				const cellHeight = img.height / grid.y;
+				const valuesPerPixel = 4; // r g b a
+
+				for (let cell = 0; cell < 25; cell++) {
+					let cellColumn = cell % 5;
+					let cellRow = Math.floor(cell / grid.x);
+					// console.log('cell', cell, 'cellColumn', cellColumn, 'cellRow', cellRow);
+					// iterate over rows of cell
+					for (let pixelRow = 0; pixelRow < cellHeight; pixelRow++) {
+						for (let pixel = 0; pixel < cellWidth; pixel++) {
+							const pixelIndex =
+								// pixelIndex
+								pixel * valuesPerPixel
+								// + pixelRowIndex
+								+ pixelRow * img.width * valuesPerPixel
+								// + cellColumnIndex
+								+ cellColumn * cellWidth * valuesPerPixel
+								// + cellRowIndex
+								+ cellRow * cellHeight * img.width * valuesPerPixel;
+
+							// add them all up
+							gridColors[cell].r += imageData.data[pixelIndex];
+							gridColors[cell].g += imageData.data[pixelIndex + 1];
+							gridColors[cell].b += imageData.data[pixelIndex + 2];
+							gridColors[cell].a += imageData.data[pixelIndex + 3];
+							// console.log(pixelIndex);
+						}
+					}
+					// calculate average
+					gridColors[cell].r = Math.round(gridColors[cell].r / cellWidth / cellHeight);
+					gridColors[cell].g = Math.round(gridColors[cell].g / cellWidth / cellHeight);
+					gridColors[cell].b = Math.round(gridColors[cell].b / cellWidth / cellHeight);
+					gridColors[cell].a = Math.round(gridColors[cell].a / cellWidth / cellHeight);
+
+					const rectX = cellColumn * cellWidth;
+					const rectY = cellRow * cellHeight;
+
+					const cellRgba = `rgba(${gridColors[cell].r}, ${gridColors[cell].g}, ${gridColors[cell].b}, ${gridColors[cell].a})`;
+
+					console.log(`cell ${cell} ${cellRgba}`);
+
+					context.beginPath();
+					context.rect(rectX, rectY, 100, 100);
+					context.fillStyle = cellRgba;
+					context.fill();
+
+					await sleep(50);
+				}
+				console.log(gridColors);
+
+			});
+		</script>
   </body>
 </html>
