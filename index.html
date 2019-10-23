@@ -40,11 +40,23 @@
       To create a production bundle, use `npm run build` or `yarn build`.
 		-->
 		<script>
+			const useAlphabet = true;
 			const greyscale = true;
 			const greyScaleRaster = 255 / 10; // 10%
 			function sleep(ms) {
 				return new Promise(resolve => setTimeout(resolve, ms));
 			}
+
+			const alphabetArray = new Array(11).fill(11).map((item, index) => {
+				return `./raster/${index * 10}.jpg`;
+			})
+			.map((src) => {
+				const img = new Image(100, 100);
+				img.src = src;
+				return img;
+			});
+
+			// console.log(alphabetArray);
 
 			const grid = {
 				x: 5,
@@ -131,20 +143,29 @@
 
 					let cellRgba = `rgba(${gridColors[cell].r}, ${gridColors[cell].g}, ${gridColors[cell].b}, ${gridColors[cell].a})`;
 
-					// console.log(`cell ${cell} ${cellRgba}`);
-
-					if (greyscale) {
+					let greyPercent;
+					if (greyscale || useAlphabet) {
 						let grey = Math.round((r + g + b) / 3 / greyScaleRaster) * greyScaleRaster;
+						greyPercent = 100 - grey / greyScaleRaster * 10;
 						cellRgba = `rgba(${grey}, ${grey}, ${grey}, ${a})`;
+						console.log(`cell ${cell} grey ${greyPercent}%`);
 					}
+					// console.log(`cell ${cell} ${cellRgba}`);
 
 					const rectX = cellColumn * cellWidth;
 					const rectY = cellRow * cellHeight;
 
-					context.beginPath();
-					context.rect(rectX, rectY, 100, 100);
-					context.fillStyle = cellRgba;
-					context.fill();
+					if (!useAlphabet || !greyscale) {
+						context.beginPath();
+						context.rect(rectX, rectY, 100, 100);
+						context.fillStyle = cellRgba;
+						context.fill();
+					}
+					else {
+						const img = alphabetArray[greyPercent / 10];
+						// console.log(greyPercent / 10, img);
+						context.drawImage(img, rectX, rectY, 100, 100);
+					}
 
 					await sleep(100);
 				}
