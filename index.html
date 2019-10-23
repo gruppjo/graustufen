@@ -68,33 +68,41 @@
 					const imageData = context.getImageData(0, 0, img.width, img.height);
 
 					const cellLength = imageData.data.length / (grid.x * grid.y);
-					console.log(imageData, imageData.data.length, cellLength);
 					const cellNumbers = imageData.data.length / cellLength;
+					console.log(imageData, imageData.data.length, cellLength, cellNumbers);
 
 					const indexTestArray = [];
-					const gridColors = [];
+					const gridColors = new Array(cellNumbers).fill(cellNumbers)
+					.map((item) => {
+						return {
+							r: 0,
+							g: 0,
+							b: 0,
+							a: 0
+						};
+					});
+					console.log(gridColors);
 
 					for (let c = 0; c < cellNumbers; c++) {
 						const startIndex = c * cellLength;
 						const endIndex = (c + 1) * cellLength;
-						let r = 0;
-						let g = 0;
-						let b = 0;
-						let a = 0;
 						// -3 because we look ahead three values +=4
 						for (let i = startIndex; i < endIndex - 3; i+= 4) {
 							indexTestArray.push(i);
-							r += imageData.data[i];
-							g += imageData.data[i + 1];
-							b += imageData.data[i + 2];
-							a += imageData.data[i + 3];
+							// add them all up
+							gridColors[c].r += imageData.data[i];
+							gridColors[c].g += imageData.data[i + 1];
+							gridColors[c].b += imageData.data[i + 2];
+							gridColors[c].a += imageData.data[i + 3];
 						}
-						r = Math.round(r / cellLength * 4);
-						g = Math.round(g / cellLength * 4);
-						b = Math.round(b / cellLength * 4);
-						a = Math.round(a / cellLength * 4);
-						console.log(`r,g,b,a`,r, g, b, a);
-						gridColors.push({r, g, b, a});
+						// calculate average
+						gridColors[c].r = Math.round(gridColors[c].r / cellLength * 4);
+						gridColors[c].g = Math.round(gridColors[c].g / cellLength * 4);
+						gridColors[c].b = Math.round(gridColors[c].b / cellLength * 4);
+						gridColors[c].a = Math.round(gridColors[c].a / cellLength * 4);
+
+						console.log(`r,g,b,a`,gridColors[c].r, gridColors[c].g, gridColors[c].b, gridColors[c].a);
+
 						const cellRgba = `rgba(${gridColors[c].r},${gridColors[c].g},${gridColors[c].b},${gridColors[c].a})`;
 						const cellX = c % 5 * 100;
 						const cellY = Math.floor(c / 5) * 100;
