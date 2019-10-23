@@ -71,7 +71,7 @@
 			};
 
 			img.el = new Image(img.width, img.height);
-			img.el.src = './crop.jpg';
+			img.el.src = './crop-dawn.jpg';
 
 			// console.log(img);
 			img.el.addEventListener('load', async () => {
@@ -105,8 +105,8 @@
 				const cellHeight = img.height / grid.y;
 				const valuesPerPixel = 4; // r g b a
 
-				for (let cell = 0; cell < 25; cell++) {
-					let cellColumn = cell % 5;
+				for (let cell = 0; cell < grid.x * grid.y; cell++) {
+					let cellColumn = cell % grid.x;
 					let cellRow = Math.floor(cell / grid.x);
 					// console.log('cell', cell, 'cellColumn', cellColumn, 'cellRow', cellRow);
 					// iterate over rows of cell
@@ -148,23 +148,23 @@
 						let grey = Math.round((r + g + b) / 3 / greyScaleRaster) * greyScaleRaster;
 						greyPercent = 100 - grey / greyScaleRaster * 10;
 						cellRgba = `rgba(${grey}, ${grey}, ${grey}, ${a})`;
-						console.log(`cell ${cell} grey ${greyPercent}%`);
+						console.log(`cell ${cell} grey ${grey} ${greyPercent}%`);
 					}
-					// console.log(`cell ${cell} ${cellRgba}`);
+					console.log(`cell ${cell} ${cellRgba}`);
 
 					const rectX = cellColumn * cellWidth;
 					const rectY = cellRow * cellHeight;
 
 					if (!useAlphabet || !greyscale) {
 						context.beginPath();
-						context.rect(rectX, rectY, 100, 100);
+						context.rect(rectX, rectY, cellWidth, cellHeight);
 						context.fillStyle = cellRgba;
 						context.fill();
 					}
 					else {
 						const img = alphabetArray[greyPercent / 10];
 						// console.log(greyPercent / 10, img);
-						context.drawImage(img, rectX, rectY, 100, 100);
+						context.drawImage(img, rectX, rectY, cellWidth, cellHeight);
 					}
 
 					await sleep(100);
