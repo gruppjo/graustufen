@@ -41,6 +41,7 @@
 		-->
 		<script>
 			const greyscale = true;
+			const greyScaleRaster = 255 / 10; // 10%
 			function sleep(ms) {
 				return new Promise(resolve => setTimeout(resolve, ms));
 			}
@@ -133,7 +134,7 @@
 					console.log(`cell ${cell} ${cellRgba}`);
 
 					if (greyscale) {
-						let grey = (r + g + b) / 3;
+						let grey = Math.round((r + g + b) / 3 / greyScaleRaster) * greyScaleRaster;
 						cellRgba = `rgba(${grey}, ${grey}, ${grey}, ${a})`;
 					}
 
