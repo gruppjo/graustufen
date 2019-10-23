@@ -131,7 +131,7 @@
 
 					let cellRgba = `rgba(${gridColors[cell].r}, ${gridColors[cell].g}, ${gridColors[cell].b}, ${gridColors[cell].a})`;
 
-					console.log(`cell ${cell} ${cellRgba}`);
+					// console.log(`cell ${cell} ${cellRgba}`);
 
 					if (greyscale) {
 						let grey = Math.round((r + g + b) / 3 / greyScaleRaster) * greyScaleRaster;
@@ -141,13 +141,12 @@
 					const rectX = cellColumn * cellWidth;
 					const rectY = cellRow * cellHeight;
 
-
 					context.beginPath();
 					context.rect(rectX, rectY, 100, 100);
 					context.fillStyle = cellRgba;
 					context.fill();
 
-					await sleep(50);
+					await sleep(100);
 				}
 				console.log(gridColors);
 
