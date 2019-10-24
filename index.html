@@ -42,8 +42,9 @@
 		<script>
 			const useAlphabet = true;
 			const greyscale = true;
-			const waitMs = 250;
-			const srcImg = './crop-lights.jpg';
+			const waitMs = 200;
+			const contrast = 1;
+			const srcImg = './crop-lighthouse3.jpg';
 			const greyScaleRaster = 255 / 10; // 10%
 			function sleep(ms) {
 				return new Promise(resolve => setTimeout(resolve, ms));
@@ -145,14 +146,20 @@
 
 					let cellRgba = `rgba(${gridColors[cell].r}, ${gridColors[cell].g}, ${gridColors[cell].b}, ${gridColors[cell].a})`;
 
+					// GREYSCALE
 					let greyPercent;
 					if (greyscale || useAlphabet) {
-						let grey = Math.round((r + g + b) / 3 / greyScaleRaster) * greyScaleRaster;
+						let grey = (r + g + b) / 3;
+						grey = contrast * (grey - 128) + 128; // contrast
+						// https://math.stackexchange.com/questions/906240/algorithms-to-increase-or-decrease-the-contrast-of-an-image
+						grey = grey > 255 ? 255 : grey; // normalize
+						grey = grey < 0 ? 0 : grey; // normalize
+						grey = Math.round( grey / greyScaleRaster) * greyScaleRaster; // map to raster
 						greyPercent = 100 - grey / greyScaleRaster * 10;
 						cellRgba = `rgba(${grey}, ${grey}, ${grey}, ${a})`;
-						console.log(`cell ${cell} grey ${grey} ${greyPercent}%`);
+						// console.log(`cell ${cell} grey ${grey} ${greyPercent}%`);
 					}
-					console.log(`cell ${cell} ${cellRgba}`);
+					// console.log(`cell ${cell} ${cellRgba}`);
 
 					const rectX = cellColumn * cellWidth;
 					const rectY = cellRow * cellHeight;
