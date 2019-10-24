@@ -42,6 +42,8 @@
 		<script>
 			const useAlphabet = true;
 			const greyscale = true;
+			const waitMs = 250;
+			const srcImg = './crop-lights.jpg';
 			const greyScaleRaster = 255 / 10; // 10%
 			function sleep(ms) {
 				return new Promise(resolve => setTimeout(resolve, ms));
@@ -71,7 +73,7 @@
 			};
 
 			img.el = new Image(img.width, img.height);
-			img.el.src = './crop-dawn.jpg';
+			img.el.src = srcImg;
 
 			// console.log(img);
 			img.el.addEventListener('load', async () => {
@@ -167,7 +169,7 @@
 						context.drawImage(img, rectX, rectY, cellWidth, cellHeight);
 					}
 
-					await sleep(100);
+					await sleep(waitMs);
 				}
 				console.log(gridColors);
 
