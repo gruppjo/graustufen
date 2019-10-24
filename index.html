@@ -42,11 +42,11 @@
 		<script>
 			const useAlphabet = true;
 			const greyscale = true;
-			const waitMs = 100;
-			let contrast = 1;
-			const contrastInterval = 0.2;
-			const contrastRuns = 10; // increase contrast with every run
-			const srcImg = './crop-sun-plant.jpg';
+			const waitMs = 50;
+			let contrast = .3;
+			const contrastInterval = 0.1;
+			const contrastRuns = 15; // increase contrast with every run
+			const srcImg = './crop-lighthouse3.jpg';
 			const greyScaleRaster = 255 / 10; // 10%
 			function sleep(ms) {
 				return new Promise(resolve => setTimeout(resolve, ms));
@@ -84,10 +84,16 @@
 				// taken from color thief - https://github.com/lokesh/color-thief/blob/master/src/color-thief.js#L31
 				const canvas = document.createElement('canvas');
 				document.body.appendChild(canvas);
+				const canvas2 = document.createElement('canvas');
+				document.body.appendChild(canvas2);
 				const context = canvas.getContext('2d');
+				const context2 = canvas2.getContext('2d');
 				canvas.width = img.width;
 				canvas.height = img.height;
+				canvas2.width = img.width;
+				canvas2.height = img.height;
 				context.drawImage(img.el, 0, 0, img.width, img.height);
+				context2.drawImage(img.el, 0, 0, img.width, img.height);
 
 				// https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D/getImageData
 				// gives you https://developer.mozilla.org/en-US/docs/Web/API/ImageData
