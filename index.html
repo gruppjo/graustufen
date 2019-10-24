@@ -42,9 +42,11 @@
 		<script>
 			const useAlphabet = true;
 			const greyscale = true;
-			const waitMs = 200;
-			const contrast = 1;
-			const srcImg = './crop-lighthouse3.jpg';
+			const waitMs = 100;
+			let contrast = 1;
+			const contrastInterval = 0.2;
+			const contrastRuns = 10; // increase contrast with every run
+			const srcImg = './crop-sun-plant.jpg';
 			const greyScaleRaster = 255 / 10; // 10%
 			function sleep(ms) {
 				return new Promise(resolve => setTimeout(resolve, ms));
@@ -108,76 +110,80 @@
 				const cellHeight = img.height / grid.y;
 				const valuesPerPixel = 4; // r g b a
 
-				for (let cell = 0; cell < grid.x * grid.y; cell++) {
-					let cellColumn = cell % grid.x;
-					let cellRow = Math.floor(cell / grid.x);
-					// console.log('cell', cell, 'cellColumn', cellColumn, 'cellRow', cellRow);
-					// iterate over rows of cell
-					for (let pixelRow = 0; pixelRow < cellHeight; pixelRow++) {
-						for (let pixel = 0; pixel < cellWidth; pixel++) {
-							const pixelIndex =
-								// pixelIndex
-								pixel * valuesPerPixel
-								// + pixelRowIndex
-								+ pixelRow * img.width * valuesPerPixel
-								// + cellColumnIndex
-								+ cellColumn * cellWidth * valuesPerPixel
-								// + cellRowIndex
-								+ cellRow * cellHeight * img.width * valuesPerPixel;
+				for (let run = 0; run < contrastRuns; run++) {
+					for (let cell = 0; cell < grid.x * grid.y; cell++) {
+						let cellColumn = cell % grid.x;
+						let cellRow = Math.floor(cell / grid.x);
+						// console.log('cell', cell, 'cellColumn', cellColumn, 'cellRow', cellRow);
+						// iterate over rows of cell
+						for (let pixelRow = 0; pixelRow < cellHeight; pixelRow++) {
+							for (let pixel = 0; pixel < cellWidth; pixel++) {
+								const pixelIndex =
+									// pixelIndex
+									pixel * valuesPerPixel
+									// + pixelRowIndex
+									+ pixelRow * img.width * valuesPerPixel
+									// + cellColumnIndex
+									+ cellColumn * cellWidth * valuesPerPixel
+									// + cellRowIndex
+									+ cellRow * cellHeight * img.width * valuesPerPixel;
 
-							// add them all up
-							gridColors[cell].r += imageData.data[pixelIndex];
-							gridColors[cell].g += imageData.data[pixelIndex + 1];
-							gridColors[cell].b += imageData.data[pixelIndex + 2];
-							gridColors[cell].a += imageData.data[pixelIndex + 3];
-							// console.log(pixelIndex);
+								// add them all up
+								gridColors[cell].r += imageData.data[pixelIndex];
+								gridColors[cell].g += imageData.data[pixelIndex + 1];
+								gridColors[cell].b += imageData.data[pixelIndex + 2];
+								gridColors[cell].a += imageData.data[pixelIndex + 3];
+								// console.log(pixelIndex);
+							}
 						}
+						// calculate average
+						const r = Math.round(gridColors[cell].r / cellWidth / cellHeight);
+						const g = Math.round(gridColors[cell].g / cellWidth / cellHeight);
+						const b = Math.round(gridColors[cell].b / cellWidth / cellHeight);
+						const a = Math.round(gridColors[cell].a / cellWidth / cellHeight);
+
+						gridColors[cell].r = r;
+						gridColors[cell].g = g;
+						gridColors[cell].b = b;
+						gridColors[cell].a = a;
+
+						let cellRgba = `rgba(${gridColors[cell].r}, ${gridColors[cell].g}, ${gridColors[cell].b}, ${gridColors[cell].a})`;
+
+						// GREYSCALE
+						let greyPercent;
+						if (greyscale || useAlphabet) {
+							let grey = (r + g + b) / 3;
+							grey = contrast * (grey - 128) + 128; // contrast
+							// https://math.stackexchange.com/questions/906240/algorithms-to-increase-or-decrease-the-contrast-of-an-image
+							grey = grey > 255 ? 255 : grey; // normalize
+							grey = grey < 0 ? 0 : grey; // normalize
+							grey = Math.round( grey / greyScaleRaster) * greyScaleRaster; // map to raster
+							greyPercent = 100 - grey / greyScaleRaster * 10;
+							cellRgba = `rgba(${grey}, ${grey}, ${grey}, ${a})`;
+							// console.log(`cell ${cell} grey ${grey} ${greyPercent}%`);
+						}
+						// console.log(`cell ${cell} ${cellRgba}`);
+
+						const rectX = cellColumn * cellWidth;
+						const rectY = cellRow * cellHeight;
+
+						if (!useAlphabet || !greyscale) {
+							context.beginPath();
+							context.rect(rectX, rectY, cellWidth, cellHeight);
+							context.fillStyle = cellRgba;
+							context.fill();
+						}
+						else {
+							const img = alphabetArray[greyPercent / 10];
+							// console.log(greyPercent / 10, img);
+							context.drawImage(img, rectX, rectY, cellWidth, cellHeight);
+						}
+
+						await sleep(waitMs);
 					}
-					// calculate average
-					const r = Math.round(gridColors[cell].r / cellWidth / cellHeight);
-					const g = Math.round(gridColors[cell].g / cellWidth / cellHeight);
-					const b = Math.round(gridColors[cell].b / cellWidth / cellHeight);
-					const a = Math.round(gridColors[cell].a / cellWidth / cellHeight);
-
-					gridColors[cell].r = r;
-					gridColors[cell].g = g;
-					gridColors[cell].b = b;
-					gridColors[cell].a = a;
-
-					let cellRgba = `rgba(${gridColors[cell].r}, ${gridColors[cell].g}, ${gridColors[cell].b}, ${gridColors[cell].a})`;
-
-					// GREYSCALE
-					let greyPercent;
-					if (greyscale || useAlphabet) {
-						let grey = (r + g + b) / 3;
-						grey = contrast * (grey - 128) + 128; // contrast
-						// https://math.stackexchange.com/questions/906240/algorithms-to-increase-or-decrease-the-contrast-of-an-image
-						grey = grey > 255 ? 255 : grey; // normalize
-						grey = grey < 0 ? 0 : grey; // normalize
-						grey = Math.round( grey / greyScaleRaster) * greyScaleRaster; // map to raster
-						greyPercent = 100 - grey / greyScaleRaster * 10;
-						cellRgba = `rgba(${grey}, ${grey}, ${grey}, ${a})`;
-						// console.log(`cell ${cell} grey ${grey} ${greyPercent}%`);
-					}
-					// console.log(`cell ${cell} ${cellRgba}`);
-
-					const rectX = cellColumn * cellWidth;
-					const rectY = cellRow * cellHeight;
-
-					if (!useAlphabet || !greyscale) {
-						context.beginPath();
-						context.rect(rectX, rectY, cellWidth, cellHeight);
-						context.fillStyle = cellRgba;
-						context.fill();
-					}
-					else {
-						const img = alphabetArray[greyPercent / 10];
-						// console.log(greyPercent / 10, img);
-						context.drawImage(img, rectX, rectY, cellWidth, cellHeight);
-					}
-
-					await sleep(waitMs);
+					contrast += contrastInterval;
 				}
+
 				console.log(gridColors);
 
 			});
